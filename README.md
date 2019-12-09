@@ -16,7 +16,13 @@ print(compute('0.1 0.1 *'));
 
 ```yaml
 dependencies:
-  google_maps: ">=3.0.0 <4.0.0"
+  calculate: "0.0.1"
+```
+
+- 获取包
+
+```basic
+pub get
 ```
 
 - 获取包
