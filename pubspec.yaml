@@ -6,3 +6,5 @@ description: >
 homepage: https://github.com/noteScript/dart-calculate
 environment:
   sdk: '>=2.0.0-dev <3.0.0'
+dev_dependencies:
+  pedantic: ^1.0.0

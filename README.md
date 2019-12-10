@@ -34,7 +34,7 @@ pub get
 - 引入你的项目
 
 ```dart
-import 'package:calculate';
+import 'package:calculate/calculate.dart';
 ```
 
 ###### 如果你不习惯逆波兰表达式，推荐使用[dart-decimal](https://github.com/a14n/dart-decimal)处理精度问题。

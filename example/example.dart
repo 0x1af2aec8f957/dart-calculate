@@ -1,3 +1,3 @@
-import 'package:calculate';
+import 'package:calculate/calculate.dart';
 
-print(compute('0.1 0.1 *'));
+void main() => print(compute('0.1 0.1 *'));
