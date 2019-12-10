@@ -16,13 +16,7 @@ print(compute('0.1 0.1 *'));
 
 ```yaml
 dependencies:
-  calculate: "0.0.1"
-```
-
-- 获取包
-
-```basic
-pub get
+  calculate: "0.0.2"
 ```
 
 - 获取包

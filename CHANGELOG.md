@@ -1,3 +1,5 @@
-#### V0.0.1
+#### V0.0.2
+    - feature pedantic
 
+#### V0.0.1
     - feature calculate
