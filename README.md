@@ -1,6 +1,6 @@
 #### Dart Calculate
 
-> 处理dart双精度计算丢失问题.
+> 处理dart double计算精度丢失问题.
 
 ##### For instance :
 
