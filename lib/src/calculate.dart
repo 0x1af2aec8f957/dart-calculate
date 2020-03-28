@@ -1,7 +1,21 @@
 // import 'dart:mirrors';
 import 'dart:math' as math;
 
-final RegExp IS_NUMBER = RegExp(r'^\-?\d*\.?\d*$');
+// final RegExp IS_NUMBER = RegExp(r'^\-?\d*\.?\d*$');
+
+int getDigitLength(num arg1){
+  final String agrStr = arg1.toString();
+  if (double.tryParse(agrStr) == null) return 0; // 非小数
+
+  return ((String _str){
+    int _digit = _str.length;
+    _str.replaceAllMapped(RegExp(r'e-?\d+'), (Match _rem){
+    _digit += (10 * int.parse(_rem.input.split('e').last) - _rem.input.length);
+    return '+++calculation.js+++';
+  });
+  return _digit;
+  })(agrStr.replaceFirst(RegExp(r'^\-?\d*\.'), ''));
+}
 
 final Map<String, double> CONST_NUMBER = const {
   'e': math.e,
@@ -13,42 +27,59 @@ final Map<String, double> CONST_NUMBER = const {
 
 final Map<String, Function> calc = { // 除法
   '/': (num arg1, num arg2) {
-    num t1 = '$arg1'.split('.').length == 2 ? '$arg1'.split('.')[1].length : 0;
-    num t2 = '$arg2'.split('.').length == 2 ? '$arg2'.split('.')[1].length : 0;
-    final r1 = num.parse('$arg1'.replaceFirst('.', ''));
-    final r2 = num.parse('$arg2'.replaceFirst('.', ''));
+    final int t1 = getDigitLength(arg1);
+    final int t2 = getDigitLength(arg2);
+    if (t1 == 0 && t2 == 0) return arg1 / arg2;
+    final result = (arg1 * (math.pow(10, t1))) / (arg2 * (math.pow(10, t2)));
 
-    return calc['*']((r1 / r2), math.pow(10, t2 - t1));
+    return calc['*'](result, math.pow(10, t2 - t1));
   },
   '*': (num arg1, num arg2) { // 乘法
-    final s1 = '$arg1';
-    final s2 = '$arg2';
-    num m = s1.split('.').length == 2 ? s1.split('.')[1].length : 0;
-    m += s2.split('.').length == 2 ? s2.split('.')[1].length : 0;
-    return num.parse(s1.replaceFirst('.', '')) * num.parse(s2.replaceFirst('.', '')) / math.pow(10, m);
+    final int t1 = getDigitLength(arg1);
+    final int t2 = getDigitLength(arg2);
+
+    if (t1 == 0 && t2 == 0) return arg1 * arg2;
+    final num result = arg1 * arg2;
+    final int m = t1 + t2;
+
+    if (m > 0 && m < 99) return result.toStringAsFixed(m + 1).replaceFirst(RegExp('[\\d]\$'), '');
+    if (m < 0 || m > 99) return result;
+    return result.toStringAsFixed(m);
   },
   '+': (num arg1, num arg2) { // 加法
-    num r1 = '$arg1'.split('.').length == 2 ? '$arg1'.split('.')[1].length : 0;
-    num r2 = '$arg2'.split('.').length == 2 ? '$arg2'.split('.')[1].length : 0;
-    final m = math.pow(10, math.max(r1, r2));
+    final int t1 = getDigitLength(arg1);
+    final int t2 = getDigitLength(arg2);
+
+    if (t1 == 0 && t2 == 0) return arg1 + arg2;
+    final int m = math.pow(10, math.max(t1, t2));
 
     return (arg1 * m + arg2 * m) / m;
   },
   '-': (num arg1, num arg2) { // 减法
-    num r1 = '$arg1'.split('.').length == 2 ? '$arg1'.split('.')[1].length : 0;
-    num r2 = '$arg2'.split('.').length == 2 ? '$arg2'.split('.')[1].length : 0;
-    final m = 10 * math.max(r1, r2);
+    final int t1 = getDigitLength(arg1);
+    final int t2= getDigitLength(arg2);
 
-    return ((arg1 * m - arg2 * m) / m).toStringAsFixed(math.max(r1, r2));
+    if (t1 == 0 && t2 == 0) return arg1 - arg2;
+    final int m = 10 * math.max(t1, t2);
+    final num result = ((arg1 * m - arg2 * m) / m);
+    final int n = math.max(t1, t2);
+
+    if (n > 0 && n < 99) return result.toStringAsFixed(n + 1).replaceFirst(RegExp('[\\d]\$'), '');
+    if (n < 0 || n > 99) return result;
+    return result.toStringAsFixed(n);
   },
   '%': (num arg1, num arg2) { // 余数
-    num r1 = '$arg1'.split('.').length == 2 ? '$arg1'.split('.')[1].length : 0;
-    num r2 = '$arg2'.split('.').length == 2 ? '$arg2'.split('.')[1].length : 0;
-    final m = math.pow(10, math.max(r1, r2));
-    return calc['*'](arg1, m) % calc['*'](arg2, m) / m;
+    final int t1 = getDigitLength(arg1);
+    final int t2 = getDigitLength(arg2);
+
+    if (t1 == 0 && t2 == 0) return arg1 % arg2;
+    final int m = math.pow(10, math.max(t1, t2));
+
+    return num.parse(calc['*'](arg1, m)) % num.parse(calc['*'](arg2, m)) / m;
   },
   '**': (num arg1, num arg2) { // 幂运算
-    num r1 = '$arg1'.split('.').length == 2 ? '$arg1'.split('.')[1].length : 0;
+    final int r1 = getDigitLength(arg1);
+
     return math.pow(arg1, arg2).toStringAsFixed(calc['*'](r1, arg2));
   },
   'atan2': math.atan2,
@@ -61,7 +92,7 @@ num compute(String exStr) {
 
   exStr.split(' ').forEach((cur) {
     if (calc.containsKey(cur)) acc.add(Function.apply(calc[cur], [num.parse(acc.removeLast()), num.parse(acc.removeLast())].reversed.toList()).toString());
-    if (IS_NUMBER.hasMatch(cur)) acc.add(cur);
+    if (num.tryParse(cur) != null) acc.add(cur);
     if (CONST_NUMBER.containsKey(cur)) acc.add(CONST_NUMBER[cur].toString());
   });
   return num.parse(acc.removeAt(0));

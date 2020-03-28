@@ -1,5 +1,5 @@
 name: calculate
-version: 0.0.2
+version: 0.0.3
 author: M <0x23fd5097@gmail.com>
 description: >
   This project enable to make computations on decimal numbers without loosing precision like double operations.
@@ -7,4 +7,4 @@ homepage: https://github.com/noteScript/dart-calculate
 environment:
   sdk: '>=2.0.0-dev <3.0.0'
 dev_dependencies:
-  pedantic: ^1.0.0
+  pedantic: ^1.9.0
