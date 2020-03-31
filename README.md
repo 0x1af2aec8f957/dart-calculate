@@ -16,7 +16,7 @@ print(compute('0.1 0.1 *'));
 
 ```yaml
 dependencies:
-  calculate: "0.0.2"
+  calculate: "0.0.4"
 ```
 
 - 获取包

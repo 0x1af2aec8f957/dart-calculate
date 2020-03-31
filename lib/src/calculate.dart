@@ -11,7 +11,7 @@ int getDigitLength(num arg1){
     int _digit = _str.length;
     _str.replaceAllMapped(RegExp(r'e-?\d+'), (Match _rem){
     _digit += (10 * int.parse(_rem.input.split('e').last) - _rem.input.length);
-    return '+++calculation.js+++';
+    return '+++calculation.dart+++';
   });
   return _digit;
   })(agrStr.replaceFirst(RegExp(r'^\-?\d*\.'), ''));
