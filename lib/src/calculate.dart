@@ -3,18 +3,24 @@ import 'dart:math' as math;
 
 // final RegExp IS_NUMBER = RegExp(r'^\-?\d*\.?\d*$');
 
-int getDigitLength(num arg1){
+int _getDigitLength(num arg1){ // 获取精度
   final String agrStr = arg1.toString();
   if (double.tryParse(agrStr) == null) return 0; // 非小数
 
   return ((String _str){
     int _digit = _str.length;
     _str.replaceAllMapped(RegExp(r'e-?\d+'), (Match _rem){
-    _digit += (10 * int.parse(_rem.input.split('e').last) - _rem.input.length);
-    return '+++calculation.dart+++';
-  });
-  return _digit;
+      _digit += (10 * int.parse(_rem.input.split('e').last) - _rem.input.length);
+      return '+++calculation.dart+++';
+    });
+    return _digit;
   })(agrStr.replaceFirst(RegExp(r'^\-?\d*\.'), ''));
+}
+
+String _precisionFix(num _num, num digit) { // 精度修复
+  final String numStr = '$_num';
+  if (digit > 0)return RegExp('^\\-?\\d*\\.?\\d{1,${digit}}').stringMatch(numStr);
+  return numStr.split('.').first;
 }
 
 final Map<String, double> CONST_NUMBER = const {
@@ -27,28 +33,26 @@ final Map<String, double> CONST_NUMBER = const {
 
 final Map<String, Function> calc = { // 除法
   '/': (num arg1, num arg2) {
-    final int t1 = getDigitLength(arg1);
-    final int t2 = getDigitLength(arg2);
+    final int t1 = _getDigitLength(arg1);
+    final int t2 = _getDigitLength(arg2);
     if (t1 == 0 && t2 == 0) return arg1 / arg2;
     final result = (arg1 * (math.pow(10, t1))) / (arg2 * (math.pow(10, t2)));
 
     return calc['*'](result, math.pow(10, t2 - t1));
   },
   '*': (num arg1, num arg2) { // 乘法
-    final int t1 = getDigitLength(arg1);
-    final int t2 = getDigitLength(arg2);
+    final int t1 = _getDigitLength(arg1);
+    final int t2 = _getDigitLength(arg2);
 
     if (t1 == 0 && t2 == 0) return arg1 * arg2;
     final num result = arg1 * arg2;
     final int m = t1 + t2;
 
-    if (m > 0 && m < 99) return result.toStringAsFixed(m + 1).replaceFirst(RegExp('[\\d]\$'), '');
-    if (m < 0 || m > 99) return result;
-    return result.toStringAsFixed(m);
+    return _precisionFix(result, m);
   },
   '+': (num arg1, num arg2) { // 加法
-    final int t1 = getDigitLength(arg1);
-    final int t2 = getDigitLength(arg2);
+    final int t1 = _getDigitLength(arg1);
+    final int t2 = _getDigitLength(arg2);
 
     if (t1 == 0 && t2 == 0) return arg1 + arg2;
     final int m = math.pow(10, math.max(t1, t2));
@@ -56,21 +60,19 @@ final Map<String, Function> calc = { // 除法
     return (arg1 * m + arg2 * m) / m;
   },
   '-': (num arg1, num arg2) { // 减法
-    final int t1 = getDigitLength(arg1);
-    final int t2= getDigitLength(arg2);
+    final int t1 = _getDigitLength(arg1);
+    final int t2= _getDigitLength(arg2);
 
     if (t1 == 0 && t2 == 0) return arg1 - arg2;
     final int m = 10 * math.max(t1, t2);
     final num result = ((arg1 * m - arg2 * m) / m);
     final int n = math.max(t1, t2);
 
-    if (n > 0 && n < 99) return result.toStringAsFixed(n + 1).replaceFirst(RegExp('[\\d]\$'), '');
-    if (n < 0 || n > 99) return result;
-    return result.toStringAsFixed(n);
+    return _precisionFix(result, n);
   },
   '%': (num arg1, num arg2) { // 余数
-    final int t1 = getDigitLength(arg1);
-    final int t2 = getDigitLength(arg2);
+    final int t1 = _getDigitLength(arg1);
+    final int t2 = _getDigitLength(arg2);
 
     if (t1 == 0 && t2 == 0) return arg1 % arg2;
     final int m = math.pow(10, math.max(t1, t2));
@@ -78,9 +80,8 @@ final Map<String, Function> calc = { // 除法
     return num.parse(calc['*'](arg1, m)) % num.parse(calc['*'](arg2, m)) / m;
   },
   '**': (num arg1, num arg2) { // 幂运算
-    final int r1 = getDigitLength(arg1);
-
-    return math.pow(arg1, arg2).toStringAsFixed(calc['*'](r1, arg2));
+    final int r1 = _getDigitLength(arg1);
+    return _precisionFix(math.pow(arg1, arg2), calc['*'](r1, arg2));
   },
   'atan2': math.atan2,
   'max': math.max,
