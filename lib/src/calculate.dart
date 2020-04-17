@@ -17,10 +17,12 @@ int _getDigitLength(num arg1){ // 获取精度
   })(agrStr.replaceFirst(RegExp(r'^\-?\d*\.'), ''));
 }
 
-String _precisionFix(num _num, num digit) { // 精度修复
-  final String numStr = '$_num';
-  if (digit > 0)return RegExp('^\\-?\\d*\\.?\\d{1,${digit}}').stringMatch(numStr);
-  return numStr.split('.').first;
+String _precisionFix(num num, num digit) { // 精度修复
+  final String numStr = num.toStringAsFixed(20); // 处理科学计数法
+  final String _int = numStr.split('.').first;
+  // 超出20的小数会使用0替代
+  if (digit > 0) return RegExp('^\\-?\\d*\\.?\\d{1,${digit}}').stringMatch(numStr);
+  return _int;
 }
 
 final Map<String, double> CONST_NUMBER = const {
