@@ -22,7 +22,7 @@ String _precisionFix(num _num, num digit) { // 精度修复
 
   if (_digit < digit) {
     final diffDigit = digit - _digit;
-    return '$_num${[for (int i; i < diffDigit; i ++) 0].join('')}';
+    return '$_num${[for (int i = 0; i < diffDigit; i ++) 0].join('')}';
   }
 
   return RegExp('^\\-?\\d*\\.?\\d{1,$digit}').stringMatch(_num.toString());
@@ -70,7 +70,7 @@ final Map<String, Function> calc = { // 除法
 
     if (t1 == 0 && t2 == 0) return arg1 - arg2;
     final int m = 10 * math.max(t1, t2);
-    final num result = ((arg1 * m - arg2 * m) / m);
+    final num result = (((arg1 * m) - (arg2 * m)) / m);
     final int n = math.max(t1, t2);
 
     return _precisionFix(result, n);

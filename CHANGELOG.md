@@ -1,3 +1,5 @@
+#### V0.0.8
+    - fix _precisionFix init i
 #### V0.0.7
     - fix _precisionFix function
 #### V0.0.6

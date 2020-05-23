@@ -1,5 +1,5 @@
 name: calculate
-version: 0.0.7
+version: 0.0.8
 author: M <0x23fd5097@gmail.com>
 description: >
   This project enable to make computations on decimal numbers without loosing precision like double operations.
