@@ -2,99 +2,143 @@
 import 'dart:math' as math;
 
 // final RegExp IS_NUMBER = RegExp(r'^\-?\d*\.?\d*$');
+class CustomNumber {
+  final num instance;
+  const CustomNumber(this.instance);
 
-int _getDigitLength(num arg1){ // 获取精度
-  final String agrStr = arg1.toString();
-  if (double.tryParse(agrStr) == null) return 0; // 非小数
+  /// 获取真实的数字（字符串）
+  String get _str => num.tryParse(this.toString())?.toString() ?? '';
+  /// 获取小数位数
+  int get digit {
+    final String strDigit = _str.replaceFirst(RegExp(r'^\-?\d*\.'), ''); // 排除整数部分
+    int _digit = strDigit.length;
 
-  return ((String _str){
-    int _digit = _str.length;
-    _str.replaceAllMapped(RegExp(r'e-?\d+'), (Match _rem){
+    strDigit.replaceAllMapped(RegExp(r'e-?\d+'), (Match _rem){ // 处理科学记数法
       _digit += (10 * int.parse(_rem.input.split('e').last) - _rem.input.length);
       return '+++calculation.dart+++';
     });
+
     return _digit;
-  })(agrStr.replaceFirst(RegExp(r'^\-?\d*\.'), ''));
-}
-
-String _precisionFix(num _num, num digit) { // 精度修复
-  final int _digit = _getDigitLength(_num); // 处理科学计数法
-
-  if (_digit < digit) {
-    final diffDigit = digit - _digit;
-    return '$_num${[for (int i = 0; i < diffDigit; i ++) 0].join('')}';
   }
 
-  return RegExp('^\\-?\\d*\\.?\\d{1,$digit}').stringMatch(_num.toString());
+  /// 精度修复
+  String precisionFix(int _digit) {
+    final int decimal = digit; // 实际已有精度
+    if (decimal < _digit) {
+      final diffDigit = digit - decimal;
+      return '${this.instance}${[for (int i = 0; i < diffDigit; i ++) 0].join('')}';
+    }
+
+    return RegExp('^\\-?\\d*\\.?\\d{1,$_digit}').stringMatch(decimal.toString());
+  }
+
+  /// 非运算类
+  double atan2(num _number) => math.atan2(instance, _number);
+  num max(num _number) => math.max(instance, _number);
+  num min(num _number) => math.min(instance, _number);
+
+  /// 常量
+  static double get e => math.e;
+  static double get ln2 => math.ln2;
+  static double get ln10 => math.ln10;
+  static double get log2e => math.log2e;
+  static double get log10e => math.log10e;
+
+  @override
+  String toString() => this.instance.toString();
+  
+  @override
+  noSuchMethod(Invocation invocation) => null;
 }
 
-final Map<String, double> CONST_NUMBER = const {
-  'e': math.e,
-  'ln2': math.ln2,
-  'ln10': math.ln10,
-  'log2e': math.log2e,
-  'log10e': math.log10e,
-};
+/// 扩展实际运算符
+extension _numberExtension on CustomNumber {
+  num operator + (CustomNumber _number){ // 加法
+    final int t1 = digit;
+    final int t2 = _number.digit;
 
-final Map<String, Function> calc = { // 除法
-  '/': (num arg1, num arg2) {
-    final int t1 = _getDigitLength(arg1);
-    final int t2 = _getDigitLength(arg2);
-    if (t1 == 0 && t2 == 0) return arg1 / arg2;
-    final result = (arg1 * (math.pow(10, t1))) / (arg2 * (math.pow(10, t2)));
-
-    return calc['*'](result, math.pow(10, t2 - t1));
-  },
-  '*': (num arg1, num arg2) { // 乘法
-    final int t1 = _getDigitLength(arg1);
-    final int t2 = _getDigitLength(arg2);
-
-    if (t1 == 0 && t2 == 0) return arg1 * arg2;
-    final num result = arg1 * arg2;
-    final int m = t1 + t2;
-
-    return _precisionFix(result, m);
-  },
-  '+': (num arg1, num arg2) { // 加法
-    final int t1 = _getDigitLength(arg1);
-    final int t2 = _getDigitLength(arg2);
-
-    if (t1 == 0 && t2 == 0) return arg1 + arg2;
+    if (t1 == 0 && t2 == 0) return this.instance + _number.instance;
     final int m = math.pow(10, math.max(t1, t2));
 
-    return (arg1 * m + arg2 * m) / m;
-  },
-  '-': (num arg1, num arg2) { // 减法
-    final int t1 = _getDigitLength(arg1);
-    final int t2= _getDigitLength(arg2);
+    return ((this.instance * m) + (_number.instance * m)) / m;
+  }
 
-    if (t1 == 0 && t2 == 0) return arg1 - arg2;
+  num operator - (CustomNumber _number){ // 减法
+    final int t1 = digit;
+    final int t2= _number.digit;
+
+    if (t1 == 0 && t2 == 0) return this.instance - _number.instance;
     final int m = 10 * math.max(t1, t2);
-    final num result = (((arg1 * m) - (arg2 * m)) / m);
+    final CustomNumber result = CustomNumber(((this.instance * m) - (_number.instance * m)) / m);
     final int n = math.max(t1, t2);
 
-    return _precisionFix(result, n);
-  },
-  '%': (num arg1, num arg2) { // 余数
-    final int t1 = _getDigitLength(arg1);
-    final int t2 = _getDigitLength(arg2);
+    return num.parse(result.precisionFix(n));
+  }
 
-    if (t1 == 0 && t2 == 0) return arg1 % arg2;
+  @override
+  num operator * (CustomNumber _number){ // 乘法
+    final int t1 = digit;
+    final int t2 = _number.digit;
+
+    if (t1 == 0 && t2 == 0) return this.instance * _number.instance;
+    final CustomNumber result = CustomNumber(this.instance * _number.instance);
+    final int m = t1 + t2;
+
+    return num.parse(result.precisionFix(m));
+  }
+
+  @override
+  num operator / (CustomNumber _number){ // 除法
+    final int t1 = digit;
+    final int t2 = _number.digit;
+    if (t1 == 0 && t2 == 0) return this.instance / _number.instance;
+    final CustomNumber result = CustomNumber(this.instance * (math.pow(10, t1)) / (_number.instance * (math.pow(10, t2))));
+
+    return result.instance * math.pow(10, t2 - t1);
+  }
+
+  @override
+  num operator % (CustomNumber _number){ // 取余
+    final int t1 = digit;
+    final int t2 = _number.digit;
+
+    if (t1 == 0 && t2 == 0) return this.instance % _number.instance;
     final int m = math.pow(10, math.max(t1, t2));
 
-    return num.parse(calc['*'](arg1, m)) % num.parse(calc['*'](arg2, m)) / m;
-  },
-  '**': (num arg1, num arg2) { // 幂运算
-    final int r1 = _getDigitLength(arg1);
-    return _precisionFix(math.pow(arg1, arg2), calc['*'](r1, arg2));
-  },
-  'atan2': math.atan2,
-  'max': math.max,
-  'min': math.min,
+    return (this.instance * m) % (_number.instance * m) / m;
+  }
+
+  @override
+  num pow (int _number){ // 幂运算
+    final int r1 = digit;
+    final CustomNumber result = CustomNumber(math.pow(this.instance, _number));
+    return num.parse(result.precisionFix(r1 * _number));
+  }
+}
+
+final Map<String, double> CONST_NUMBER = {
+  'e': CustomNumber.e,
+  'ln2': CustomNumber.ln2,
+  'ln10': CustomNumber.ln10,
+  'log2e': CustomNumber.log2e,
+  'log10e': CustomNumber.log10e,
 };
 
-num compute(String exStr) {
-  final acc = [];
+
+final Map<String, Function> calc = {
+  '/': (num arg1, num arg2) => CustomNumber(arg1) / CustomNumber(arg2), // 除法
+  '*': (num arg1, num arg2) => CustomNumber(arg1) * CustomNumber(arg2), // 乘法
+  '+': (num arg1, num arg2) => CustomNumber(arg1) + CustomNumber(arg2), // 加法
+  '-': (num arg1, num arg2) => CustomNumber(arg1) - CustomNumber(arg2), // 减法
+  '%': (num arg1, num arg2) => CustomNumber(arg1) % CustomNumber(arg2), // 余数
+  '**': (num arg1, int arg2) => CustomNumber(arg1).pow(arg2), // 幂运算
+  'atan2': (num arg1, num arg2) => CustomNumber(arg1).atan2(arg2),
+  'max': (num arg1, num arg2) => CustomNumber(arg1).max(arg2),
+  'min': (num arg1, num arg2) => CustomNumber(arg1).min(arg2),
+};
+
+num compute(String exStr) { // 逆波兰表达式计算
+  final List<String> acc = [];
 
   exStr.split(' ').forEach((cur) {
     if (calc.containsKey(cur)) acc.add(Function.apply(calc[cur], [num.parse(acc.removeLast()), num.parse(acc.removeLast())].reversed.toList()).toString());
