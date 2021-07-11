@@ -29,7 +29,7 @@ class CustomNumber {
       return '${this.instance}${[for (int i = 0; i < diffDigit; i ++) 0].join('')}';
     }
 
-    return RegExp('^\\-?\\d*\\.?\\d{1,$_digit}').stringMatch(decimal.toString());
+    return RegExp('^\\-?\\d*\\.?\\d{1,$_digit}').stringMatch(_str);
   }
 
   /// 非运算类
