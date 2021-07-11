@@ -10,7 +10,7 @@ class CustomNumber {
   String get _str => num.tryParse(this.toString())?.toString() ?? '';
   /// 获取小数位数
   int get digit {
-    final String strDigit = _str.replaceFirst(RegExp(r'^\-?\d*\.'), ''); // 排除整数部分
+    final String strDigit = _str.replaceFirst(RegExp(r'^\-?\d*\.?'), ''); // 排除整数部分
     int _digit = strDigit.length;
 
     strDigit.replaceAllMapped(RegExp(r'e-?\d+'), (Match _rem){ // 处理科学记数法
