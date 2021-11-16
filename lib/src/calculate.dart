@@ -29,7 +29,7 @@ class CustomNumber {
       return '${this.instance}${[for (int i = 0; i < diffDigit; i ++) 0].join('')}';
     }
 
-    return RegExp('^\\-?\\d*\\.?\\d{1,$_digit}').stringMatch(_str);
+    return RegExp('^\\-?\\d*\\.?\\d{1,$_digit}').stringMatch(_str) ?? 0.toString();
   }
 
   /// 非运算类
@@ -44,8 +44,7 @@ class CustomNumber {
   static double get log2e => math.log2e;
   static double get log10e => math.log10e;
 
-  @override
-  String toString() => this.instance.toString();
+  @override  String toString() => this.instance.toStringAsFixed(20);
   
   @override
   noSuchMethod(Invocation invocation) => null;
