@@ -1,6 +1,7 @@
 #### Dart Calculate
 
 > 处理dart double计算精度丢失问题.
+> 从V1.0.0开始。库内代码计算使用[dart-decimal](https://github.com/a14n/dart-decimal),本库仅提供`逆波兰表达式`实现。
 
 ##### For instance :
 

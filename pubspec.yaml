@@ -1,5 +1,5 @@
 name: calculate
-version: 0.0.13
+version: 1.0.0
 author: M <0x23fd5097@gmail.com>
 description: >
   This project enable to make computations on decimal numbers without loosing precision like double operations.
@@ -8,3 +8,5 @@ environment:
   sdk: '>=2.7.0 <3.0.0'
 dev_dependencies:
   pedantic: ^1.11.1
+dependencies: 
+  decimal: ^1.5.0
