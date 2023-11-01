@@ -1,4 +1,4 @@
-#### V1.0.1
+#### V2.0.0
     - support flutter 3.0
 #### V1.0.0
     - add dart-decimal
