@@ -1,3 +1,5 @@
+![pub](https://img.shields.io/pub/v/calculate)
+
 #### Dart Calculate
 
 > 处理dart double计算精度丢失问题.
